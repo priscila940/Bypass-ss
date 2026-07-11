@@ -1,0 +1,35 @@
+name: Build Anti-Share Bypass
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up MinGW
+      run: choco install mingw-w64 -y
+      
+    - name: Set up environment
+      run: |
+        echo "Setting up build environment..."
+        mkdir -p build
+        
+    - name: Build executable
+      run: |
+        cd build
+        $env:PATH += ";C:\mingw64\bin"
+        g++ -Wall -O2 -mwindows -c ..\src\anti_share_bypass.cpp -o anti_share_bypass.obj
+        g++ -Wall -O2 -mwindows anti_share_bypass.obj -o anti_share_bypass.exe -lShlwapi -lAdvapi32
+        
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: anti-share-bypass-exe
+        path: build/anti_share_bypass.exe
